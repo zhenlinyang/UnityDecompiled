@@ -1,5 +1,4 @@
 using System;
-using UnityEditor.Collaboration;
 using UnityEditorInternal;
 using UnityEngine;
 
@@ -19,9 +18,9 @@ namespace UnityEditor
 
 			public static readonly GUIContent cleanCache = EditorGUIUtility.TextContent("Clean Cache");
 
-			public static readonly GUIContent browseCacheLocation = EditorGUIUtility.TextContent("Browse for local asset cache server location");
+			public static readonly GUIContent enumerateCache = EditorGUIUtility.TextContent("Check Cache Size|Check the size of the local asset cache server - can take a while");
 
-			public static readonly GUIContent cacheSizeIs = EditorGUIUtility.TextContent("Cache size is");
+			public static readonly GUIContent browseCacheLocation = EditorGUIUtility.TextContent("Browse for local asset cache server location");
 		}
 
 		internal class Constants
@@ -125,7 +124,7 @@ namespace UnityEditor
 				if (EditorUtility.DisplayDialog("Delete old Cache", text, "Delete", "Don't Delete"))
 				{
 					LocalCacheServer.Clear();
-					CacheServerPreferences.s_LocalCacheServerUsedSize = 0L;
+					CacheServerPreferences.s_LocalCacheServerUsedSize = -1L;
 				}
 			}
 			EditorPrefs.SetString("CacheServerIPAddress", CacheServerPreferences.s_CacheServerIPAddress);
@@ -149,7 +148,6 @@ namespace UnityEditor
 			{
 				CacheServerPreferences.s_Constants = new CacheServerPreferences.Constants();
 			}
-			GUILayout.Space(10f);
 			if (!InternalEditorUtility.HasTeamLicense())
 			{
 				GUILayout.Label(EditorGUIUtility.TempContent("You need to have a Pro or Team license to use the cache server.", EditorGUIUtility.GetHelpIcon(MessageType.Warning)), EditorStyles.helpBox, new GUILayoutOption[0]);
@@ -173,7 +171,7 @@ namespace UnityEditor
 					CacheServerPreferences.s_PrefsLoaded = true;
 				}
 				EditorGUI.BeginChangeCheck();
-				if (Collab.instance.collabInfo.whitelisted && CacheServerPreferences.IsCollabCacheEnabled())
+				if (CacheServerPreferences.IsCollabCacheEnabled())
 				{
 					CacheServerPreferences.s_CollabCacheEnabled = EditorGUILayout.Toggle("Use Collab Cache", CacheServerPreferences.s_CollabCacheEnabled, new GUILayoutOption[0]);
 					using (new EditorGUI.DisabledScope(!CacheServerPreferences.s_CollabCacheEnabled))
@@ -231,12 +229,12 @@ namespace UnityEditor
 					CacheServerPreferences.s_EnableCustomPath = EditorGUILayout.Toggle(CacheServerPreferences.Styles.customCacheLocation, CacheServerPreferences.s_EnableCustomPath, new GUILayoutOption[0]);
 					if (CacheServerPreferences.s_EnableCustomPath)
 					{
-						GUIStyle popup = EditorStyles.popup;
+						GUIStyle miniButton = EditorStyles.miniButton;
 						GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-						EditorGUILayout.PrefixLabel(CacheServerPreferences.Styles.cacheFolderLocation, popup);
-						Rect rect = GUILayoutUtility.GetRect(GUIContent.none, popup);
+						EditorGUILayout.PrefixLabel(CacheServerPreferences.Styles.cacheFolderLocation, miniButton);
+						Rect rect = GUILayoutUtility.GetRect(GUIContent.none, miniButton);
 						GUIContent content = (!string.IsNullOrEmpty(CacheServerPreferences.s_CachePath)) ? new GUIContent(CacheServerPreferences.s_CachePath) : CacheServerPreferences.Styles.browse;
-						if (EditorGUI.ButtonMouseDown(rect, content, FocusType.Passive, popup))
+						if (EditorGUI.DropdownButton(rect, content, FocusType.Passive, miniButton))
 						{
 							string folder = CacheServerPreferences.s_CachePath;
 							string text = EditorUtility.OpenFolderPanel(CacheServerPreferences.Styles.browseCacheLocation.text, folder, "");
@@ -259,19 +257,39 @@ namespace UnityEditor
 					{
 						CacheServerPreferences.s_CachePath = "";
 					}
-					if (GUILayout.Button(CacheServerPreferences.Styles.cleanCache, new GUILayoutOption[]
+					bool flag = LocalCacheServer.CheckCacheLocationExists();
+					if (flag)
 					{
-						GUILayout.Width(120f)
-					}))
-					{
-						LocalCacheServer.Clear();
-						CacheServerPreferences.s_LocalCacheServerUsedSize = 0L;
+						GUIContent label = EditorGUIUtility.TextContent("Cache size is unknown");
+						if (CacheServerPreferences.s_LocalCacheServerUsedSize != -1L)
+						{
+							label = EditorGUIUtility.TextContent("Cache size is " + EditorUtility.FormatBytes(CacheServerPreferences.s_LocalCacheServerUsedSize));
+						}
+						GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+						GUIStyle miniButton2 = EditorStyles.miniButton;
+						EditorGUILayout.PrefixLabel(label, miniButton2);
+						Rect rect2 = GUILayoutUtility.GetRect(GUIContent.none, miniButton2);
+						if (EditorGUI.Button(rect2, CacheServerPreferences.Styles.enumerateCache, miniButton2))
+						{
+							CacheServerPreferences.s_LocalCacheServerUsedSize = ((!LocalCacheServer.CheckCacheLocationExists()) ? 0L : FileUtil.GetDirectorySize(LocalCacheServer.GetCacheLocation()));
+						}
+						GUILayout.EndHorizontal();
+						GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+						GUIContent blankContent = EditorGUIUtility.blankContent;
+						EditorGUILayout.PrefixLabel(blankContent, miniButton2);
+						Rect rect3 = GUILayoutUtility.GetRect(GUIContent.none, miniButton2);
+						if (EditorGUI.Button(rect3, CacheServerPreferences.Styles.cleanCache, miniButton2))
+						{
+							LocalCacheServer.Clear();
+							CacheServerPreferences.s_LocalCacheServerUsedSize = 0L;
+						}
+						GUILayout.EndHorizontal();
 					}
-					if (CacheServerPreferences.s_LocalCacheServerUsedSize == -1L)
+					else
 					{
-						CacheServerPreferences.s_LocalCacheServerUsedSize = FileUtil.GetDirectorySize(LocalCacheServer.GetCacheLocation());
+						EditorGUILayout.HelpBox("Local cache directory does not exist - please check that you can access the cache folder and are able to write to it", MessageType.Warning, false);
+						CacheServerPreferences.s_LocalCacheServerUsedSize = -1L;
 					}
-					GUILayout.Label(CacheServerPreferences.Styles.cacheSizeIs.text + " " + EditorUtility.FormatBytes(CacheServerPreferences.s_LocalCacheServerUsedSize), new GUILayoutOption[0]);
 					GUILayout.Label(CacheServerPreferences.Styles.cacheFolderLocation.text + ":", new GUILayoutOption[0]);
 					GUILayout.Label(LocalCacheServer.GetCacheLocation(), CacheServerPreferences.s_Constants.cacheFolderLocation, new GUILayoutOption[0]);
 				}
@@ -279,11 +297,11 @@ namespace UnityEditor
 				{
 					CacheServerPreferences.s_HasPendingChanges = true;
 				}
-				if ((CacheServerPreferences.s_HasPendingChanges && type == EventType.MouseUp) || type == EventType.KeyDown)
+				if (CacheServerPreferences.s_HasPendingChanges && GUIUtility.hotControl == 0)
 				{
+					CacheServerPreferences.s_HasPendingChanges = false;
 					CacheServerPreferences.WritePreferences();
 					CacheServerPreferences.ReadPreferences();
-					CacheServerPreferences.s_HasPendingChanges = false;
 				}
 			}
 		}

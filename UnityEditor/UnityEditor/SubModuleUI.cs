@@ -59,7 +59,7 @@ namespace UnityEditor
 
 		private void CreateSubEmitter(SerializedProperty objectRefProp, int index, SubModuleUI.SubEmitterType type)
 		{
-			GameObject gameObject = this.m_ParticleSystemUI.m_ParticleEffectUI.CreateParticleSystem(this.m_ParticleSystemUI.m_ParticleSystem, type);
+			GameObject gameObject = this.m_ParticleSystemUI.m_ParticleEffectUI.CreateParticleSystem(this.m_ParticleSystemUI.m_ParticleSystems[0], type);
 			gameObject.name = "SubEmitter" + index;
 			objectRefProp.objectReferenceValue = gameObject.GetComponent<ParticleSystem>();
 		}
@@ -82,11 +82,14 @@ namespace UnityEditor
 							string text = ParticleSystemEditorUtils.CheckCircularReferences(particleSystem);
 							if (text.Length == 0)
 							{
-								this.CheckIfChild(objectReferenceValue);
+								if (!this.CheckIfChild(objectReferenceValue))
+								{
+									flag = false;
+								}
 							}
 							else
 							{
-								string message = string.Format("'{0}' could not be assigned as subemitter on '{1}' due to circular referencing!\nBacktrace: {2} \n\nReference will be removed.", particleSystem.gameObject.name, this.m_ParticleSystemUI.m_ParticleSystem.gameObject.name, text);
+								string message = string.Format("'{0}' could not be assigned as subemitter on '{1}' due to circular referencing!\nBacktrace: {2} \n\nReference will be removed.", particleSystem.gameObject.name, this.m_ParticleSystemUI.m_ParticleSystems[0].gameObject.name, text);
 								EditorUtility.DisplayDialog("Circular References Detected", message, "Ok");
 								flag = false;
 							}
@@ -132,7 +135,7 @@ namespace UnityEditor
 			}
 			else
 			{
-				ParticleSystem root = this.m_ParticleSystemUI.m_ParticleEffectUI.GetRoot();
+				ParticleSystem root = ParticleSystemEditorUtils.GetRoot(this.m_ParticleSystemUI.m_ParticleSystems[0]);
 				if (root.gameObject.activeInHierarchy && !subEmitter.gameObject.activeInHierarchy)
 				{
 					string message = string.Format("The assigned sub emitter is part of a prefab and can therefore not be assigned.", new object[0]);
@@ -153,37 +156,45 @@ namespace UnityEditor
 			return result;
 		}
 
-		private void CheckIfChild(UnityEngine.Object subEmitter)
+		private bool CheckIfChild(UnityEngine.Object subEmitter)
 		{
-			if (subEmitter != null)
+			ParticleSystem root = ParticleSystemEditorUtils.GetRoot(this.m_ParticleSystemUI.m_ParticleSystems[0]);
+			bool result;
+			if (SubModuleUI.IsChild(subEmitter as ParticleSystem, root))
 			{
-				ParticleSystem root = this.m_ParticleSystemUI.m_ParticleEffectUI.GetRoot();
-				if (!SubModuleUI.IsChild(subEmitter as ParticleSystem, root))
+				result = true;
+			}
+			else
+			{
+				string message = string.Format("The assigned sub emitter is not a child of the current root particle system GameObject: '{0}' and is therefore NOT considered a part of the current effect. Do you want to reparent it?", root.gameObject.name);
+				if (EditorUtility.DisplayDialog("Reparent GameObjects", message, "Yes, Reparent", "No, Remove"))
 				{
-					string message = string.Format("The assigned sub emitter is not a child of the current root particle system GameObject: '{0}' and is therefore NOT considered a part of the current effect. Do you want to reparent it?", root.gameObject.name);
-					if (EditorUtility.DisplayDialog("Reparent GameObjects", message, "Yes, Reparent", "No"))
+					if (EditorUtility.IsPersistent(subEmitter))
 					{
-						if (EditorUtility.IsPersistent(subEmitter))
+						GameObject gameObject = UnityEngine.Object.Instantiate(subEmitter) as GameObject;
+						if (gameObject != null)
 						{
-							GameObject gameObject = UnityEngine.Object.Instantiate(subEmitter) as GameObject;
-							if (gameObject != null)
-							{
-								gameObject.transform.parent = this.m_ParticleSystemUI.m_ParticleSystem.transform;
-								gameObject.transform.localPosition = Vector3.zero;
-								gameObject.transform.localRotation = Quaternion.identity;
-							}
-						}
-						else
-						{
-							ParticleSystem particleSystem = subEmitter as ParticleSystem;
-							if (particleSystem)
-							{
-								Undo.SetTransformParent(particleSystem.gameObject.transform.transform, this.m_ParticleSystemUI.m_ParticleSystem.transform, "Reparent sub emitter");
-							}
+							gameObject.transform.parent = this.m_ParticleSystemUI.m_ParticleSystems[0].transform;
+							gameObject.transform.localPosition = Vector3.zero;
+							gameObject.transform.localRotation = Quaternion.identity;
 						}
 					}
+					else
+					{
+						ParticleSystem particleSystem = subEmitter as ParticleSystem;
+						if (particleSystem)
+						{
+							Undo.SetTransformParent(particleSystem.gameObject.transform.transform, this.m_ParticleSystemUI.m_ParticleSystems[0].transform, "Reparent sub emitter");
+						}
+					}
+					result = true;
+				}
+				else
+				{
+					result = false;
 				}
 			}
+			return result;
 		}
 
 		private List<UnityEngine.Object> GetSubEmitterProperties()
@@ -198,48 +209,61 @@ namespace UnityEditor
 			return list;
 		}
 
-		public override void OnInspectorGUI(ParticleSystem s)
+		public override void OnInspectorGUI(InitialModuleUI initial)
 		{
 			if (SubModuleUI.s_Texts == null)
 			{
 				SubModuleUI.s_Texts = new SubModuleUI.Texts();
 			}
-			List<UnityEngine.Object> subEmitterProperties = this.GetSubEmitterProperties();
-			GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-			GUILayout.Label("", ParticleSystemStyles.Get().label, new GUILayoutOption[]
+			if (this.m_ParticleSystemUI.multiEdit)
 			{
-				GUILayout.ExpandWidth(true)
-			});
-			GUILayout.Label(SubModuleUI.s_Texts.inherit, ParticleSystemStyles.Get().label, new GUILayoutOption[]
-			{
-				GUILayout.Width(120f)
-			});
-			GUILayout.EndHorizontal();
-			for (int i = 0; i < this.m_SubEmitters.arraySize; i++)
-			{
-				this.ShowSubEmitter(i);
+				EditorGUILayout.HelpBox("Sub Emitter editing is only available when editing a single Particle System", MessageType.Info, true);
 			}
-			List<UnityEngine.Object> subEmitterProperties2 = this.GetSubEmitterProperties();
-			for (int j = 0; j < Mathf.Min(subEmitterProperties.Count, subEmitterProperties2.Count); j++)
+			else
 			{
-				if (subEmitterProperties[j] != subEmitterProperties2[j])
+				List<UnityEngine.Object> subEmitterProperties = this.GetSubEmitterProperties();
+				GUILayout.BeginHorizontal(new GUILayoutOption[]
 				{
-					if (this.m_CheckObjectIndex == -1)
+					GUILayout.Height(16f)
+				});
+				GUILayout.Label("", ParticleSystemStyles.Get().label, new GUILayoutOption[]
+				{
+					GUILayout.ExpandWidth(true)
+				});
+				GUILayout.Label(SubModuleUI.s_Texts.inherit, ParticleSystemStyles.Get().label, new GUILayoutOption[]
+				{
+					GUILayout.Width(120f)
+				});
+				GUILayout.EndHorizontal();
+				for (int i = 0; i < this.m_SubEmitters.arraySize; i++)
+				{
+					this.ShowSubEmitter(i);
+				}
+				List<UnityEngine.Object> subEmitterProperties2 = this.GetSubEmitterProperties();
+				for (int j = 0; j < Mathf.Min(subEmitterProperties.Count, subEmitterProperties2.Count); j++)
+				{
+					if (subEmitterProperties[j] != subEmitterProperties2[j])
 					{
-						EditorApplication.update = (EditorApplication.CallbackFunction)Delegate.Combine(EditorApplication.update, new EditorApplication.CallbackFunction(this.Update));
+						if (this.m_CheckObjectIndex == -1)
+						{
+							EditorApplication.update = (EditorApplication.CallbackFunction)Delegate.Combine(EditorApplication.update, new EditorApplication.CallbackFunction(this.Update));
+						}
+						this.m_CheckObjectIndex = j;
 					}
-					this.m_CheckObjectIndex = j;
 				}
 			}
 		}
 
 		private void ShowSubEmitter(int index)
 		{
-			GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+			GUILayout.BeginHorizontal(new GUILayoutOption[]
+			{
+				GUILayout.Height(16f)
+			});
 			SerializedProperty arrayElementAtIndex = this.m_SubEmitters.GetArrayElementAtIndex(index);
 			SerializedProperty serializedProperty = arrayElementAtIndex.FindPropertyRelative("emitter");
 			SerializedProperty serializedProperty2 = arrayElementAtIndex.FindPropertyRelative("type");
-			SerializedProperty serializedProperty3 = arrayElementAtIndex.FindPropertyRelative("properties");
+			SerializedProperty intProp = arrayElementAtIndex.FindPropertyRelative("properties");
 			ModuleUI.GUIPopup(GUIContent.none, serializedProperty2, SubModuleUI.s_Texts.subEmitterTypeTexts, new GUILayoutOption[]
 			{
 				GUILayout.MaxWidth(80f)
@@ -249,19 +273,25 @@ namespace UnityEditor
 				GUILayout.Width(4f)
 			});
 			ModuleUI.GUIObject(GUIContent.none, serializedProperty, new GUILayoutOption[0]);
+			GUIStyle gUIStyle = new GUIStyle("OL Plus");
 			if (serializedProperty.objectReferenceValue == null)
 			{
 				GUILayout.Label("", ParticleSystemStyles.Get().label, new GUILayoutOption[]
 				{
 					GUILayout.Width(8f)
 				});
-				if (GUILayout.Button(GUIContent.none, ParticleSystemStyles.Get().plus, new GUILayoutOption[]
+				GUILayout.BeginVertical(new GUILayoutOption[]
 				{
-					GUILayout.Width(16f)
-				}))
+					GUILayout.Width(16f),
+					GUILayout.Height(gUIStyle.fixedHeight)
+				});
+				GUILayout.FlexibleSpace();
+				if (GUILayout.Button(GUIContent.none, ParticleSystemStyles.Get().plus, new GUILayoutOption[0]))
 				{
 					this.CreateSubEmitter(serializedProperty, index, (SubModuleUI.SubEmitterType)serializedProperty2.intValue);
 				}
+				GUILayout.FlexibleSpace();
+				GUILayout.EndVertical();
 			}
 			else
 			{
@@ -270,7 +300,7 @@ namespace UnityEditor
 					GUILayout.Width(24f)
 				});
 			}
-			serializedProperty3.intValue = ModuleUI.GUIMask(GUIContent.none, serializedProperty3.intValue, SubModuleUI.s_Texts.propertyStrings, new GUILayoutOption[]
+			ModuleUI.GUIMask(GUIContent.none, intProp, SubModuleUI.s_Texts.propertyStrings, new GUILayoutOption[]
 			{
 				GUILayout.Width(100f)
 			});
@@ -280,15 +310,15 @@ namespace UnityEditor
 			});
 			if (index == 0)
 			{
-				if (GUILayout.Button(GUIContent.none, new GUIStyle("OL Plus"), new GUILayoutOption[]
+				if (GUILayout.Button(GUIContent.none, gUIStyle, new GUILayoutOption[]
 				{
 					GUILayout.Width(16f)
 				}))
 				{
 					this.m_SubEmitters.InsertArrayElementAtIndex(this.m_SubEmitters.arraySize);
 					SerializedProperty arrayElementAtIndex2 = this.m_SubEmitters.GetArrayElementAtIndex(this.m_SubEmitters.arraySize - 1);
-					SerializedProperty serializedProperty4 = arrayElementAtIndex2.FindPropertyRelative("emitter");
-					serializedProperty4.objectReferenceValue = null;
+					SerializedProperty serializedProperty3 = arrayElementAtIndex2.FindPropertyRelative("emitter");
+					serializedProperty3.objectReferenceValue = null;
 				}
 			}
 			else if (GUILayout.Button(GUIContent.none, new GUIStyle("OL Minus"), new GUILayoutOption[]

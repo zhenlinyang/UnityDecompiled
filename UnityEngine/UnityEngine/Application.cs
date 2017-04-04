@@ -4,7 +4,9 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
+using System.Threading;
 using UnityEngine.Internal;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.Scripting;
 
@@ -13,6 +15,8 @@ namespace UnityEngine
 	public sealed class Application
 	{
 		public delegate void AdvertisingIdentifierCallback(string advertisingId, bool trackingEnabled, string errorMsg);
+
+		public delegate void LowMemoryCallback();
 
 		public delegate void LogCallback(string condition, string stackTrace, LogType type);
 
@@ -23,6 +27,32 @@ namespace UnityEngine
 		private static Application.LogCallback s_LogCallbackHandlerThreaded;
 
 		private static volatile Application.LogCallback s_RegisterLogCallbackDeprecated;
+
+		public static event Application.LowMemoryCallback lowMemory
+		{
+			add
+			{
+				Application.LowMemoryCallback lowMemoryCallback = Application.lowMemory;
+				Application.LowMemoryCallback lowMemoryCallback2;
+				do
+				{
+					lowMemoryCallback2 = lowMemoryCallback;
+					lowMemoryCallback = Interlocked.CompareExchange<Application.LowMemoryCallback>(ref Application.lowMemory, (Application.LowMemoryCallback)Delegate.Combine(lowMemoryCallback2, value), lowMemoryCallback);
+				}
+				while (lowMemoryCallback != lowMemoryCallback2);
+			}
+			remove
+			{
+				Application.LowMemoryCallback lowMemoryCallback = Application.lowMemory;
+				Application.LowMemoryCallback lowMemoryCallback2;
+				do
+				{
+					lowMemoryCallback2 = lowMemoryCallback;
+					lowMemoryCallback = Interlocked.CompareExchange<Application.LowMemoryCallback>(ref Application.lowMemory, (Application.LowMemoryCallback)Delegate.Remove(lowMemoryCallback2, value), lowMemoryCallback);
+				}
+				while (lowMemoryCallback != lowMemoryCallback2);
+			}
+		}
 
 		public static event Application.LogCallback logMessageReceived
 		{
@@ -53,30 +83,42 @@ namespace UnityEngine
 		[Obsolete("This property is deprecated, please use LoadLevelAsync to detect if a specific scene is currently loading.")]
 		public static extern bool isLoadingLevel
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern int streamedBytes
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool isPlaying
 		{
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern bool isFocused
+		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool isEditor
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool isWebPlayer
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -84,6 +126,14 @@ namespace UnityEngine
 		[ThreadAndSerializationSafe]
 		public static extern RuntimePlatform platform
 		{
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern string buildGUID
+		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -131,8 +181,10 @@ namespace UnityEngine
 
 		public static extern bool runInBackground
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -148,30 +200,35 @@ namespace UnityEngine
 
 		internal static extern bool isBatchmode
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		internal static extern bool isTestRun
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		internal static extern bool isHumanControllingUs
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string dataPath
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string streamingAssetsPath
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -179,78 +236,91 @@ namespace UnityEngine
 		[SecurityCritical]
 		public static extern string persistentDataPath
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string temporaryCachePath
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string srcValue
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string absoluteURL
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string unityVersion
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string version
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string installerName
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		public static extern string bundleIdentifier
+		public static extern string identifier
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern ApplicationInstallMode installMode
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern ApplicationSandboxType sandboxType
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string productName
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string companyName
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string cloudProjectId
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -258,6 +328,7 @@ namespace UnityEngine
 		[Obsolete("Application.webSecurityEnabled is no longer supported, since the Unity Web Player is no longer supported by Unity."), ThreadAndSerializationSafe]
 		public static extern bool webSecurityEnabled
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -265,20 +336,24 @@ namespace UnityEngine
 		[Obsolete("Application.webSecurityHostUrl is no longer supported, since the Unity Web Player is no longer supported by Unity."), ThreadAndSerializationSafe]
 		public static extern string webSecurityHostUrl
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern int targetFrameRate
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern SystemLanguage systemLanguage
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -286,48 +361,59 @@ namespace UnityEngine
 		[Obsolete("Use SetStackTraceLogType/GetStackTraceLogType instead")]
 		public static extern StackTraceLogType stackTraceLogType
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern ThreadPriority backgroundLoadingPriority
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern NetworkReachability internetReachability
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool genuine
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool genuineCheckAvailable
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		internal static extern bool submitAnalytics
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		public static extern bool isShowingSplashScreen
+		[Obsolete("This property is deprecated, please use SplashScreen.isFinished instead")]
+		public static bool isShowingSplashScreen
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return !SplashScreen.isFinished;
+			}
 		}
 
 		[Obsolete("Use SceneManager.sceneCountInBuildSettings")]
@@ -366,18 +452,42 @@ namespace UnityEngine
 			}
 		}
 
+		[Obsolete("bundleIdentifier is deprecated. Please use identifier instead (UnityUpgradable) -> identifier", true)]
+		public static string bundleIdentifier
+		{
+			get
+			{
+				return Application.identifier;
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void CallLowMemory()
+		{
+			Application.LowMemoryCallback lowMemoryCallback = Application.lowMemory;
+			if (lowMemoryCallback != null)
+			{
+				lowMemoryCallback();
+			}
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Quit();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CancelQuit();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Unload();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float GetStreamProgressForLevelByName(string levelName);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetStreamProgressForLevel(int levelIndex);
 
@@ -386,9 +496,11 @@ namespace UnityEngine
 			return Application.GetStreamProgressForLevelByName(levelName);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CanStreamedLevelBeLoadedByName(string levelName);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool CanStreamedLevelBeLoaded(int levelIndex);
 
@@ -397,6 +509,11 @@ namespace UnityEngine
 			return Application.CanStreamedLevelBeLoadedByName(levelName);
 		}
 
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern string[] GetBuildTags();
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CaptureScreenshot(string filename, [DefaultValue("0")] int superSize);
 
@@ -407,19 +524,23 @@ namespace UnityEngine
 			Application.CaptureScreenshot(filename, superSize);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasProLicense();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool HasAdvancedLicense();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool HasARGV(string name);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern string GetValueForARGV(string name);
 
-		[Obsolete("Use Object.DontDestroyOnLoad instead")]
+		[Obsolete("Use Object.DontDestroyOnLoad instead"), GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DontDestroyOnLoad(Object mono);
 
@@ -523,6 +644,7 @@ namespace UnityEngine
 			Application.Internal_ExternalCall(script);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_ExternalCall(string script);
 
@@ -534,13 +656,15 @@ namespace UnityEngine
 			}
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool RequestAdvertisingIdentifierAsync(Application.AdvertisingIdentifierCallback delegateMethod);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void OpenURL(string url);
 
-		[Obsolete("For internal use only")]
+		[Obsolete("For internal use only"), GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ForceCrash(int mode);
 
@@ -562,38 +686,25 @@ namespace UnityEngine
 			}
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLogCallbackDefined(bool defined);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern StackTraceLogType GetStackTraceLogType(LogType logType);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStackTraceLogType(LogType logType, StackTraceLogType stackTraceType);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern AsyncOperation RequestUserAuthorization(UserAuthorization mode);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasUserAuthorization(UserAuthorization mode);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void ReplyToUserAuthorizationRequest(bool reply, [DefaultValue("false")] bool remember);
-
-		[ExcludeFromDocs]
-		internal static void ReplyToUserAuthorizationRequest(bool reply)
-		{
-			bool remember = false;
-			Application.ReplyToUserAuthorizationRequest(reply, remember);
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetUserAuthorizationRequestMode_Internal();
-
-		internal static UserAuthorization GetUserAuthorizationRequestMode()
-		{
-			return (UserAuthorization)Application.GetUserAuthorizationRequestMode_Internal();
-		}
 
 		[Obsolete("Application.RegisterLogCallback is deprecated. Use Application.logMessageReceived instead.")]
 		public static void RegisterLogCallback(Application.LogCallback handler)

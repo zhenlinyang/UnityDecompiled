@@ -90,12 +90,14 @@ namespace UnityEngine.SceneManagement
 
 		public static extern int sceneCount
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern int sceneCountInBuildSettings
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -107,6 +109,7 @@ namespace UnityEngine.SceneManagement
 			return result;
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetActiveScene(out Scene value);
 
@@ -115,6 +118,7 @@ namespace UnityEngine.SceneManagement
 			return SceneManager.INTERNAL_CALL_SetActiveScene(ref scene);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool INTERNAL_CALL_SetActiveScene(ref Scene scene);
 
@@ -125,6 +129,7 @@ namespace UnityEngine.SceneManagement
 			return result;
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetSceneByPath(string scenePath, out Scene value);
 
@@ -135,6 +140,7 @@ namespace UnityEngine.SceneManagement
 			return result;
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetSceneByName(string name, out Scene value);
 
@@ -145,6 +151,7 @@ namespace UnityEngine.SceneManagement
 			return result;
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetSceneByBuildIndex(int buildIndex, out Scene value);
 
@@ -155,6 +162,7 @@ namespace UnityEngine.SceneManagement
 			return result;
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetSceneAt(int index, out Scene value);
 
@@ -217,6 +225,7 @@ namespace UnityEngine.SceneManagement
 			return SceneManager.LoadSceneAsyncNameIndexInternal(null, sceneBuildIndex, mode == LoadSceneMode.Additive, false);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AsyncOperation LoadSceneAsyncNameIndexInternal(string sceneName, int sceneBuildIndex, bool isAdditive, bool mustCompleteNextFrame);
 
@@ -227,16 +236,24 @@ namespace UnityEngine.SceneManagement
 			return result;
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_CreateScene(string sceneName, out Scene value);
 
 		[Obsolete("Use SceneManager.UnloadSceneAsync. This function is not safe to use during triggers and under other circumstances. See Scripting reference for more details.")]
 		public static bool UnloadScene(Scene scene)
 		{
-			bool result;
-			SceneManager.UnloadSceneNameIndexInternal("", scene.buildIndex, true, out result);
-			return result;
+			return SceneManager.UnloadSceneInternal(scene);
 		}
+
+		private static bool UnloadSceneInternal(Scene scene)
+		{
+			return SceneManager.INTERNAL_CALL_UnloadSceneInternal(ref scene);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_UnloadSceneInternal(ref Scene scene);
 
 		[Obsolete("Use SceneManager.UnloadSceneAsync. This function is not safe to use during triggers and under other circumstances. See Scripting reference for more details.")]
 		public static bool UnloadScene(int sceneBuildIndex)
@@ -268,10 +285,19 @@ namespace UnityEngine.SceneManagement
 
 		public static AsyncOperation UnloadSceneAsync(Scene scene)
 		{
-			bool flag;
-			return SceneManager.UnloadSceneNameIndexInternal("", scene.buildIndex, false, out flag);
+			return SceneManager.UnloadSceneAsyncInternal(scene);
 		}
 
+		private static AsyncOperation UnloadSceneAsyncInternal(Scene scene)
+		{
+			return SceneManager.INTERNAL_CALL_UnloadSceneAsyncInternal(ref scene);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AsyncOperation INTERNAL_CALL_UnloadSceneAsyncInternal(ref Scene scene);
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AsyncOperation UnloadSceneNameIndexInternal(string sceneName, int sceneBuildIndex, bool immediately, out bool outSuccess);
 
@@ -280,6 +306,7 @@ namespace UnityEngine.SceneManagement
 			SceneManager.INTERNAL_CALL_MergeScenes(ref sourceScene, ref destinationScene);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_MergeScenes(ref Scene sourceScene, ref Scene destinationScene);
 
@@ -288,6 +315,7 @@ namespace UnityEngine.SceneManagement
 			SceneManager.INTERNAL_CALL_MoveGameObjectToScene(go, ref scene);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_MoveGameObjectToScene(GameObject go, ref Scene scene);
 

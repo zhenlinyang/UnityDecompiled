@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Internal;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -28,24 +29,28 @@ namespace UnityEngine
 
 		public extern bool isReadable
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		internal extern bool canAccess
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int blendShapeCount
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int vertexBufferCount
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -66,30 +71,37 @@ namespace UnityEngine
 
 		public extern int vertexCount
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int subMeshCount
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern BoneWeight[] boneWeights
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern Matrix4x4[] bindposes
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -248,9 +260,11 @@ namespace UnityEngine
 			Mesh.Internal_Create(this);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] Mesh mono);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Clear([UnityEngine.Internal.DefaultValue("true")] bool keepVertexLayout);
 
@@ -261,42 +275,63 @@ namespace UnityEngine
 			this.Clear(keepVertexLayout);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void PrintErrorCantAccessMesh(Mesh.InternalShaderChannel channel);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void PrintErrorCantAccessMeshForIndices();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void PrintErrorBadSubmeshIndexTriangles();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void PrintErrorBadSubmeshIndexIndices();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetArrayForChannelImpl(Mesh.InternalShaderChannel channel, Mesh.InternalVertexChannelType format, int dim, Array values, int arraySize);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Array GetAllocArrayFromChannelImpl(Mesh.InternalShaderChannel channel, Mesh.InternalVertexChannelType format, int dim);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetArrayFromChannelImpl(Mesh.InternalShaderChannel channel, Mesh.InternalVertexChannelType format, int dim, Array values);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern bool HasChannel(Mesh.InternalShaderChannel channel);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ResizeList(object list, int size);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Array ExtractArrayFromList(object list);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int[] GetTrianglesImpl(int submesh);
 
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetTrianglesNonAllocImpl(object values, int submesh);
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int[] GetIndicesImpl(int submesh);
 
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetIndicesNonAllocImpl(object values, int submesh);
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetTrianglesImpl(int submesh, Array triangles, int arraySize, [UnityEngine.Internal.DefaultValue("true")] bool calculateBounds);
 
@@ -307,6 +342,7 @@ namespace UnityEngine
 			this.SetTrianglesImpl(submesh, triangles, arraySize, calculateBounds);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetIndicesImpl(int submesh, MeshTopology topology, Array indices, int arraySize, [UnityEngine.Internal.DefaultValue("true")] bool calculateBounds);
 
@@ -362,21 +398,27 @@ namespace UnityEngine
 			}
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ClearBlendShapes();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string GetBlendShapeName(int shapeIndex);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetBlendShapeFrameCount(int shapeIndex);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetBlendShapeFrameWeight(int shapeIndex, int frameIndex);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void GetBlendShapeFrameVertices(int shapeIndex, int frameIndex, Vector3[] deltaVertices, Vector3[] deltaNormals, Vector3[] deltaTangents);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void AddBlendShapeFrame(string shapeName, float frameWeight, Vector3[] deltaVertices, Vector3[] deltaNormals, Vector3[] deltaTangents);
 
@@ -387,6 +429,7 @@ namespace UnityEngine
 			return result;
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetNativeVertexBufferPtr(Mesh self, int bufferIndex, out IntPtr value);
 
@@ -397,52 +440,95 @@ namespace UnityEngine
 			return result;
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetNativeIndexBufferPtr(Mesh self, out IntPtr value);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_bounds(out Bounds value);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_bounds(ref Bounds value);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RecalculateBounds();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RecalculateNormals();
 
-		[EditorBrowsable(EditorBrowsableState.Never), Obsolete("This method is no longer supported (UnityUpgradable)", true)]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void RecalculateTangents();
+
+		[EditorBrowsable(EditorBrowsableState.Never), Obsolete("This method is no longer supported (UnityUpgradable)", true), GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Optimize();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern MeshTopology GetTopology(int submesh);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CombineMeshes(CombineInstance[] combine, [UnityEngine.Internal.DefaultValue("true")] bool mergeSubMeshes, [UnityEngine.Internal.DefaultValue("true")] bool useMatrices);
+		public extern uint GetIndexStart(int submesh);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern uint GetIndexCount(int submesh);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void CombineMeshes(CombineInstance[] combine, [UnityEngine.Internal.DefaultValue("true")] bool mergeSubMeshes, [UnityEngine.Internal.DefaultValue("true")] bool useMatrices, [UnityEngine.Internal.DefaultValue("false")] bool hasLightmapData);
+
+		[ExcludeFromDocs]
+		public void CombineMeshes(CombineInstance[] combine, bool mergeSubMeshes, bool useMatrices)
+		{
+			bool hasLightmapData = false;
+			this.CombineMeshes(combine, mergeSubMeshes, useMatrices, hasLightmapData);
+		}
 
 		[ExcludeFromDocs]
 		public void CombineMeshes(CombineInstance[] combine, bool mergeSubMeshes)
 		{
+			bool hasLightmapData = false;
 			bool useMatrices = true;
-			this.CombineMeshes(combine, mergeSubMeshes, useMatrices);
+			this.CombineMeshes(combine, mergeSubMeshes, useMatrices, hasLightmapData);
 		}
 
 		[ExcludeFromDocs]
 		public void CombineMeshes(CombineInstance[] combine)
 		{
+			bool hasLightmapData = false;
 			bool useMatrices = true;
 			bool mergeSubMeshes = true;
-			this.CombineMeshes(combine, mergeSubMeshes, useMatrices);
+			this.CombineMeshes(combine, mergeSubMeshes, useMatrices, hasLightmapData);
 		}
 
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetBoneWeightsNonAllocImpl(object values);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetBindposeCount();
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetBindposesNonAllocImpl(object values);
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void MarkDynamic();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void UploadMeshData(bool markNoLogerReadable);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetBlendShapeIndex(string blendShapeName);
 
@@ -543,9 +629,56 @@ namespace UnityEngine
 			this.SetSizedArrayForChannel(channel, Mesh.InternalVertexChannelType.Float, Mesh.DefaultDimensionForChannel(channel), Mesh.ExtractArrayFromList(values), this.SafeLength<T>(values));
 		}
 
+		private void GetListForChannel<T>(List<T> buffer, int capacity, Mesh.InternalShaderChannel channel, int dim)
+		{
+			this.GetListForChannel<T>(buffer, capacity, channel, dim, Mesh.InternalVertexChannelType.Float);
+		}
+
+		private void GetListForChannel<T>(List<T> buffer, int capacity, Mesh.InternalShaderChannel channel, int dim, Mesh.InternalVertexChannelType channelType)
+		{
+			buffer.Clear();
+			if (!this.canAccess)
+			{
+				this.PrintErrorCantAccessMesh(channel);
+			}
+			else if (this.HasChannel(channel))
+			{
+				this.PrepareUserBuffer<T>(buffer, capacity);
+				this.GetArrayFromChannelImpl(channel, channelType, dim, Mesh.ExtractArrayFromList(buffer));
+			}
+		}
+
+		private void PrepareUserBuffer<T>(List<T> buffer, int capacity)
+		{
+			buffer.Clear();
+			if (buffer.Capacity < capacity)
+			{
+				buffer.Capacity = capacity;
+			}
+			Mesh.ResizeList(buffer, capacity);
+		}
+
+		public void GetVertices(List<Vector3> vertices)
+		{
+			if (vertices == null)
+			{
+				throw new ArgumentNullException("The result vertices list cannot be null.", "vertices");
+			}
+			this.GetListForChannel<Vector3>(vertices, this.vertexCount, Mesh.InternalShaderChannel.Vertex, Mesh.DefaultDimensionForChannel(Mesh.InternalShaderChannel.Vertex));
+		}
+
 		public void SetVertices(List<Vector3> inVertices)
 		{
 			this.SetListForChannel<Vector3>(Mesh.InternalShaderChannel.Vertex, inVertices);
+		}
+
+		public void GetNormals(List<Vector3> normals)
+		{
+			if (normals == null)
+			{
+				throw new ArgumentNullException("The result normals list cannot be null.", "normals");
+			}
+			this.GetListForChannel<Vector3>(normals, this.vertexCount, Mesh.InternalShaderChannel.Normal, Mesh.DefaultDimensionForChannel(Mesh.InternalShaderChannel.Normal));
 		}
 
 		public void SetNormals(List<Vector3> inNormals)
@@ -553,14 +686,41 @@ namespace UnityEngine
 			this.SetListForChannel<Vector3>(Mesh.InternalShaderChannel.Normal, inNormals);
 		}
 
+		public void GetTangents(List<Vector4> tangents)
+		{
+			if (tangents == null)
+			{
+				throw new ArgumentNullException("The result tangents list cannot be null.", "tangents");
+			}
+			this.GetListForChannel<Vector4>(tangents, this.vertexCount, Mesh.InternalShaderChannel.Tangent, Mesh.DefaultDimensionForChannel(Mesh.InternalShaderChannel.Tangent));
+		}
+
 		public void SetTangents(List<Vector4> inTangents)
 		{
 			this.SetListForChannel<Vector4>(Mesh.InternalShaderChannel.Tangent, inTangents);
 		}
 
+		public void GetColors(List<Color> colors)
+		{
+			if (colors == null)
+			{
+				throw new ArgumentNullException("The result colors list cannot be null.", "colors");
+			}
+			this.GetListForChannel<Color>(colors, this.vertexCount, Mesh.InternalShaderChannel.Color, Mesh.DefaultDimensionForChannel(Mesh.InternalShaderChannel.Color));
+		}
+
 		public void SetColors(List<Color> inColors)
 		{
 			this.SetListForChannel<Color>(Mesh.InternalShaderChannel.Color, inColors);
+		}
+
+		public void GetColors(List<Color32> colors)
+		{
+			if (colors == null)
+			{
+				throw new ArgumentNullException("The result colors list cannot be null.", "colors");
+			}
+			this.GetListForChannel<Color32>(colors, this.vertexCount, Mesh.InternalShaderChannel.Color, 1, Mesh.InternalVertexChannelType.Color);
 		}
 
 		public void SetColors(List<Color32> inColors)
@@ -595,37 +755,17 @@ namespace UnityEngine
 			this.SetUvsImpl<Vector4>(channel, 4, uvs);
 		}
 
-		private void GetUVsInternal<T>(List<T> uvs, int uvIndex, int dim)
-		{
-			Mesh.InternalShaderChannel uVChannel = this.GetUVChannel(uvIndex);
-			Mesh.ResizeList(uvs, this.vertexCount);
-			this.GetArrayFromChannelImpl(uVChannel, Mesh.InternalVertexChannelType.Float, dim, Mesh.ExtractArrayFromList(uvs));
-		}
-
 		private void GetUVsImpl<T>(int uvIndex, List<T> uvs, int dim)
 		{
 			if (uvs == null)
 			{
-				throw new ArgumentException("The result uvs list cannot be null", "uvs");
+				throw new ArgumentNullException("The result uvs list cannot be null.", "uvs");
 			}
 			if (uvIndex < 0 || uvIndex > 3)
 			{
-				throw new ArgumentException("The uv index is invalid (must be in [0..3]", "uvIndex");
+				throw new IndexOutOfRangeException("Specified uv index is out of range. Must be in the range [0, 3].");
 			}
-			uvs.Clear();
-			Mesh.InternalShaderChannel uVChannel = this.GetUVChannel(uvIndex);
-			if (!this.canAccess)
-			{
-				this.PrintErrorCantAccessMesh(uVChannel);
-			}
-			else if (this.HasChannel(uVChannel))
-			{
-				if (this.vertexCount > uvs.Capacity)
-				{
-					uvs.Capacity = this.vertexCount;
-				}
-				this.GetUVsInternal<T>(uvs, uvIndex, dim);
-			}
+			this.GetListForChannel<T>(uvs, this.vertexCount, this.GetUVChannel(uvIndex), dim);
 		}
 
 		public void GetUVs(int channel, List<Vector2> uvs)
@@ -685,9 +825,58 @@ namespace UnityEngine
 			return (!this.CheckCanAccessSubmeshTriangles(submesh)) ? new int[0] : this.GetTrianglesImpl(submesh);
 		}
 
+		public void GetTriangles(List<int> triangles, int submesh)
+		{
+			if (triangles == null)
+			{
+				throw new ArgumentNullException("The result triangles list cannot be null.", "triangles");
+			}
+			if (submesh < 0 || submesh >= this.subMeshCount)
+			{
+				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
+			}
+			this.PrepareUserBuffer<int>(triangles, (int)this.GetIndexCount(submesh));
+			this.GetTrianglesNonAllocImpl(triangles, submesh);
+		}
+
 		public int[] GetIndices(int submesh)
 		{
 			return (!this.CheckCanAccessSubmeshIndices(submesh)) ? new int[0] : this.GetIndicesImpl(submesh);
+		}
+
+		public void GetIndices(List<int> indices, int submesh)
+		{
+			if (indices == null)
+			{
+				throw new ArgumentNullException("The result indices list cannot be null.", "indices");
+			}
+			if (submesh < 0 || submesh >= this.subMeshCount)
+			{
+				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
+			}
+			this.PrepareUserBuffer<int>(indices, (int)this.GetIndexCount(submesh));
+			indices.Clear();
+			this.GetIndicesNonAllocImpl(indices, submesh);
+		}
+
+		public void GetBindposes(List<Matrix4x4> bindposes)
+		{
+			if (bindposes == null)
+			{
+				throw new ArgumentNullException("The result bindposes list cannot be null.", "bindposes");
+			}
+			this.PrepareUserBuffer<Matrix4x4>(bindposes, this.GetBindposeCount());
+			this.GetBindposesNonAllocImpl(bindposes);
+		}
+
+		public void GetBoneWeights(List<BoneWeight> boneWeights)
+		{
+			if (boneWeights == null)
+			{
+				throw new ArgumentNullException("The result boneWeights list cannot be null.", "boneWeights");
+			}
+			this.PrepareUserBuffer<BoneWeight>(boneWeights, this.vertexCount);
+			this.GetBoneWeightsNonAllocImpl(boneWeights);
 		}
 	}
 }

@@ -107,11 +107,8 @@ namespace UnityEngine.UI
 
 		public virtual void Cull(Rect clipRect, bool validRect)
 		{
-			if (base.canvasRenderer.hasMoved)
-			{
-				bool cull = !validRect || !clipRect.Overlaps(this.rootCanvasRect, true);
-				this.UpdateCull(cull);
-			}
+			bool cull = !validRect || !clipRect.Overlaps(this.rootCanvasRect, true);
+			this.UpdateCull(cull);
 		}
 
 		private void UpdateCull(bool cull)
@@ -161,6 +158,14 @@ namespace UnityEngine.UI
 			{
 				MaskUtilities.NotifyStencilStateChanged(this);
 			}
+		}
+
+		protected override void OnValidate()
+		{
+			base.OnValidate();
+			this.m_ShouldRecalculateStencil = true;
+			this.UpdateClipParent();
+			this.SetMaterialDirty();
 		}
 
 		protected override void OnTransformParentChanged()

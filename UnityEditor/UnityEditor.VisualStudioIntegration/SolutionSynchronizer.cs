@@ -52,6 +52,10 @@ namespace UnityEditor.VisualStudioIntegration
 				ScriptingLanguage.None
 			},
 			{
+				"hlsl",
+				ScriptingLanguage.None
+			},
+			{
 				"glslinc",
 				ScriptingLanguage.None
 			}
@@ -164,7 +168,7 @@ namespace UnityEditor.VisualStudioIntegration
 
 		private static void DumpIsland(MonoIsland island)
 		{
-			Console.WriteLine("{0} ({1})", island._output, island._classlib_profile);
+			Console.WriteLine("{0} ({1})", island._output, island._api_compatibility_level);
 			Console.WriteLine("Files: ");
 			Console.WriteLine(string.Join("\n", island._files));
 			Console.WriteLine("References: ");
@@ -235,7 +239,7 @@ namespace UnityEditor.VisualStudioIntegration
 		{
 			if (!File.Exists(filename) || !(newContents == File.ReadAllText(filename)))
 			{
-				File.WriteAllText(filename, newContents);
+				File.WriteAllText(filename, newContents, Encoding.UTF8);
 			}
 		}
 
@@ -412,19 +416,22 @@ namespace UnityEditor.VisualStudioIntegration
 		private string SolutionText(IEnumerable<MonoIsland> islands, SolutionSynchronizer.Mode mode)
 		{
 			string text = "11.00";
+			string text2 = "2010";
 			if (this._settings.VisualStudioVersion == 9)
 			{
 				text = "10.00";
+				text2 = "2008";
 			}
 			IEnumerable<MonoIsland> enumerable = SolutionSynchronizer.RelevantIslandsForMode(islands, mode);
 			string projectEntries = this.GetProjectEntries(enumerable);
-			string text2 = string.Join(SolutionSynchronizer.WindowsNewline, (from i in enumerable
+			string text3 = string.Join(SolutionSynchronizer.WindowsNewline, (from i in enumerable
 			select this.GetProjectActiveConfigurations(this.ProjectGuid(i._output))).ToArray<string>());
 			return string.Format(this._settings.SolutionTemplate, new object[]
 			{
 				text,
-				projectEntries,
 				text2,
+				projectEntries,
+				text3,
 				this.ReadExistingMonoDevelopSolutionProperties()
 			});
 		}
@@ -441,7 +448,7 @@ namespace UnityEditor.VisualStudioIntegration
 			IEnumerable<string> source = from i in islands
 			select string.Format(SolutionSynchronizer.DefaultSynchronizationSettings.SolutionProjectEntryTemplate, new object[]
 			{
-				this.SolutionGuid(),
+				this.SolutionGuid(i),
 				this._projectName,
 				Path.GetFileName(this.ProjectFile(i)),
 				this.ProjectGuid(i._output)
@@ -466,9 +473,9 @@ namespace UnityEditor.VisualStudioIntegration
 			return SolutionGuidGenerator.GuidForProject(this._projectName + Path.GetFileNameWithoutExtension(assembly));
 		}
 
-		private string SolutionGuid()
+		private string SolutionGuid(MonoIsland island)
 		{
-			return SolutionGuidGenerator.GuidForSolution(this._projectName);
+			return SolutionGuidGenerator.GuidForSolution(this._projectName, island.GetExtensionOfSourceFiles());
 		}
 
 		private string ProjectFooter(MonoIsland island)

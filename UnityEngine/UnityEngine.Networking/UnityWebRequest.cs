@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
+using UnityEngine.Scripting;
+using UnityEngineInternal;
 
 namespace UnityEngine.Networking
 {
@@ -48,7 +50,8 @@ namespace UnityEngine.Networking
 			SSLCACertError,
 			UnrecognizedContentEncoding,
 			LoginFailed,
-			SSLShutdownFailed
+			SSLShutdownFailed,
+			NoInternetConnection
 		}
 
 		[NonSerialized]
@@ -65,8 +68,6 @@ namespace UnityEngine.Networking
 		public const string kHttpVerbCREATE = "CREATE";
 
 		public const string kHttpVerbDELETE = "DELETE";
-
-		private static Regex domainRegex = new Regex("^\\s*\\w+(?:\\.\\w+)+\\s*$");
 
 		private static readonly string[] forbiddenHeaderKeys = new string[]
 		{
@@ -164,14 +165,17 @@ namespace UnityEngine.Networking
 
 		public extern string error
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern bool useHttpContinue
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -184,117 +188,103 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				string text = value;
-				string uriString = "http://localhost/";
-				Uri uri = new Uri(uriString);
-				if (text.StartsWith("//"))
-				{
-					text = uri.Scheme + ":" + text;
-				}
-				if (text.StartsWith("/"))
-				{
-					text = uri.Scheme + "://" + uri.Host + text;
-				}
-				if (UnityWebRequest.domainRegex.IsMatch(text))
-				{
-					text = uri.Scheme + "://" + text;
-				}
-				Uri uri2 = null;
-				try
-				{
-					uri2 = new Uri(text);
-				}
-				catch (FormatException ex)
-				{
-					try
-					{
-						uri2 = new Uri(uri, text);
-					}
-					catch (FormatException)
-					{
-						throw ex;
-					}
-				}
-				this.InternalSetUrl(uri2.AbsoluteUri);
+				string localUrl = "http://localhost/";
+				this.InternalSetUrl(WebRequestUtils.MakeInitialUrl(value, localUrl));
 			}
 		}
 
 		public extern long responseCode
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern float uploadProgress
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern bool isModifiable
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern bool isDone
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern bool isError
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern float downloadProgress
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern ulong uploadedBytes
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern ulong downloadedBytes
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int redirectLimit
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool chunkedTransfer
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern UploadHandler uploadHandler
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern DownloadHandler downloadHandler
 		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -357,7 +347,27 @@ namespace UnityEngine.Networking
 
 		public static UnityWebRequest GetAudioClip(string uri, AudioType audioType)
 		{
-			return new UnityWebRequest(uri, "GET", new DownloadHandlerAudioClip(uri, audioType), null);
+			Type type = Type.GetType("UnityEngine.Networking.DownloadHandlerAudioClip");
+			UnityWebRequest result;
+			if (type == null)
+			{
+				result = UnityWebRequest.Get(uri);
+			}
+			else
+			{
+				ConstructorInfo constructor = type.GetConstructor(new Type[]
+				{
+					typeof(string),
+					typeof(AudioType)
+				});
+				UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "GET", constructor.Invoke(new object[]
+				{
+					uri,
+					audioType
+				}) as DownloadHandler, null);
+				result = unityWebRequest;
+			}
+			return result;
 		}
 
 		public static UnityWebRequest GetAssetBundle(string uri)
@@ -393,8 +403,13 @@ namespace UnityEngine.Networking
 		public static UnityWebRequest Post(string uri, string postData)
 		{
 			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
-			string s = WWWTranscoder.URLEncode(postData, Encoding.UTF8);
-			unityWebRequest.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(s));
+			byte[] data = null;
+			if (!string.IsNullOrEmpty(postData))
+			{
+				string s = WWWTranscoder.URLEncode(postData, Encoding.UTF8);
+				data = Encoding.UTF8.GetBytes(s);
+			}
+			unityWebRequest.uploadHandler = new UploadHandlerRaw(data);
 			unityWebRequest.uploadHandler.contentType = "application/x-www-form-urlencoded";
 			unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
 			return unityWebRequest;
@@ -403,12 +418,24 @@ namespace UnityEngine.Networking
 		public static UnityWebRequest Post(string uri, WWWForm formData)
 		{
 			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
-			unityWebRequest.uploadHandler = new UploadHandlerRaw(formData.data);
-			unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
-			Dictionary<string, string> headers = formData.headers;
-			foreach (KeyValuePair<string, string> current in headers)
+			byte[] array = null;
+			if (formData != null)
 			{
-				unityWebRequest.SetRequestHeader(current.Key, current.Value);
+				array = formData.data;
+				if (array.Length == 0)
+				{
+					array = null;
+				}
+			}
+			unityWebRequest.uploadHandler = new UploadHandlerRaw(array);
+			unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+			if (formData != null)
+			{
+				Dictionary<string, string> headers = formData.headers;
+				foreach (KeyValuePair<string, string> current in headers)
+				{
+					unityWebRequest.SetRequestHeader(current.Key, current.Value);
+				}
 			}
 			return unityWebRequest;
 		}
@@ -422,7 +449,11 @@ namespace UnityEngine.Networking
 		public static UnityWebRequest Post(string uri, List<IMultipartFormSection> multipartFormSections, byte[] boundary)
 		{
 			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
-			byte[] data = UnityWebRequest.SerializeFormSections(multipartFormSections, boundary);
+			byte[] data = null;
+			if (multipartFormSections != null && multipartFormSections.Count != 0)
+			{
+				data = UnityWebRequest.SerializeFormSections(multipartFormSections, boundary);
+			}
 			unityWebRequest.uploadHandler = new UploadHandlerRaw(data)
 			{
 				contentType = "multipart/form-data; boundary=" + Encoding.UTF8.GetString(boundary, 0, boundary.Length)
@@ -434,7 +465,11 @@ namespace UnityEngine.Networking
 		public static UnityWebRequest Post(string uri, Dictionary<string, string> formFields)
 		{
 			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
-			byte[] data = UnityWebRequest.SerializeSimpleForm(formFields);
+			byte[] data = null;
+			if (formFields != null && formFields.Count != 0)
+			{
+				data = UnityWebRequest.SerializeSimpleForm(formFields);
+			}
 			unityWebRequest.uploadHandler = new UploadHandlerRaw(data)
 			{
 				contentType = "application/x-www-form-urlencoded"
@@ -519,10 +554,11 @@ namespace UnityEngine.Networking
 			return Encoding.UTF8.GetBytes(text);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void InternalCreate();
 
-		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator, ThreadAndSerializationSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void InternalDestroy();
 
@@ -559,9 +595,11 @@ namespace UnityEngine.Networking
 			GC.SuppressFinalize(this);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern AsyncOperation InternalBegin();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void InternalAbort();
 
@@ -575,30 +613,39 @@ namespace UnityEngine.Networking
 			this.InternalAbort();
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void InternalSetMethod(UnityWebRequest.UnityWebRequestMethod methodType);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void InternalSetCustomMethod(string customMethodName);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int InternalGetMethod();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern string InternalGetCustomMethod();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int InternalGetError();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern string InternalGetUrl();
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetUrl(string url);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string GetRequestHeader(string name);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void InternalSetRequestHeader(string name, string value);
 
@@ -623,9 +670,11 @@ namespace UnityEngine.Networking
 			this.InternalSetRequestHeader(name, value);
 		}
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string GetResponseHeader(string name);
 
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern string[] InternalGetResponseHeaderKeys();
 

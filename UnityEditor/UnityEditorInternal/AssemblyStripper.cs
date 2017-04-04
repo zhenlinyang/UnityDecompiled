@@ -67,7 +67,7 @@ namespace UnityEditorInternal
 			});
 		}
 
-		private static bool StripAssembliesTo(string[] assemblies, string[] searchDirs, string outputFolder, string workingDirectory, out string output, out string error, string linkerPath, IIl2CppPlatformProvider platformProvider, IEnumerable<string> additionalBlacklist, bool developmentBuild)
+		private static bool StripAssembliesTo(string[] assemblies, string[] searchDirs, string outputFolder, string workingDirectory, out string output, out string error, string linkerPath, IIl2CppPlatformProvider platformProvider, IEnumerable<string> additionalBlacklist)
 		{
 			if (!Directory.Exists(outputFolder))
 			{
@@ -88,11 +88,11 @@ namespace UnityEditorInternal
 			additionalBlacklist = additionalBlacklist.Concat(userBlacklistFiles);
 			List<string> list = new List<string>
 			{
-				"--api " + PlayerSettings.apiCompatibilityLevel.ToString(),
+				"--api " + PlayerSettings.GetApiCompatibilityLevel(EditorUserBuildSettings.activeBuildTargetGroup).ToString(),
 				"-out \"" + outputFolder + "\"",
 				"-l none",
 				"-c link",
-				"-b " + developmentBuild,
+				"-b true",
 				"-x \"" + AssemblyStripper.GetModuleWhitelist("Core", platformProvider.moduleStrippingInformationFolder) + "\"",
 				"-f \"" + Path.Combine(platformProvider.il2CppFolder, "LinkerDescriptors") + "\""
 			};
@@ -122,7 +122,7 @@ namespace UnityEditorInternal
 			select Path.Combine(managedDir, s)).ToList<string>();
 		}
 
-		internal static void StripAssemblies(string stagingAreaData, IIl2CppPlatformProvider platformProvider, RuntimeClassRegistry rcr, bool developmentBuild)
+		internal static void StripAssemblies(string stagingAreaData, IIl2CppPlatformProvider platformProvider, RuntimeClassRegistry rcr)
 		{
 			string fullPath = Path.GetFullPath(Path.Combine(stagingAreaData, "Managed"));
 			List<string> userAssemblies = AssemblyStripper.GetUserAssemblies(rcr, fullPath);
@@ -131,7 +131,7 @@ namespace UnityEditorInternal
 			{
 				fullPath
 			};
-			AssemblyStripper.RunAssemblyStripper(stagingAreaData, userAssemblies, fullPath, assembliesToStrip, searchDirs, AssemblyStripper.MonoLinker2Path, platformProvider, rcr, developmentBuild);
+			AssemblyStripper.RunAssemblyStripper(stagingAreaData, userAssemblies, fullPath, assembliesToStrip, searchDirs, AssemblyStripper.MonoLinker2Path, platformProvider, rcr);
 		}
 
 		internal static void GenerateInternalCallSummaryFile(string icallSummaryPath, string managedAssemblyFolderPath, string strippedDLLPath)
@@ -168,7 +168,7 @@ namespace UnityEditorInternal
 			return result;
 		}
 
-		private static void RunAssemblyStripper(string stagingAreaData, IEnumerable assemblies, string managedAssemblyFolderPath, string[] assembliesToStrip, string[] searchDirs, string monoLinkerPath, IIl2CppPlatformProvider platformProvider, RuntimeClassRegistry rcr, bool developmentBuild)
+		private static void RunAssemblyStripper(string stagingAreaData, IEnumerable assemblies, string managedAssemblyFolderPath, string[] assembliesToStrip, string[] searchDirs, string monoLinkerPath, IIl2CppPlatformProvider platformProvider, RuntimeClassRegistry rcr)
 		{
 			bool flag = rcr != null && PlayerSettings.stripEngineCode && platformProvider.supportsEngineStripping;
 			IEnumerable<string> enumerable = AssemblyStripper.Il2CppBlacklistPaths;
@@ -179,6 +179,12 @@ namespace UnityEditorInternal
 					AssemblyStripper.WriteMethodsToPreserveBlackList(stagingAreaData, rcr),
 					MonoAssemblyStripping.GenerateLinkXmlToPreserveDerivedTypes(stagingAreaData, managedAssemblyFolderPath, rcr)
 				});
+			}
+			BuildTargetGroup buildTargetGroup = BuildPipeline.GetBuildTargetGroup(platformProvider.target);
+			if (PlayerSettings.GetApiCompatibilityLevel(buildTargetGroup) == ApiCompatibilityLevel.NET_4_6)
+			{
+				string path = Path.Combine(platformProvider.il2CppFolder, "LinkerDescriptors");
+				enumerable = enumerable.Concat(Directory.GetFiles(path, "*45.xml"));
 			}
 			if (!flag)
 			{
@@ -202,26 +208,29 @@ namespace UnityEditorInternal
 					break;
 				}
 				string text2;
-				if (!AssemblyStripper.StripAssembliesTo(assembliesToStrip, searchDirs, fullPath, managedAssemblyFolderPath, out text2, out text3, monoLinkerPath, platformProvider, enumerable, developmentBuild))
+				if (!AssemblyStripper.StripAssembliesTo(assembliesToStrip, searchDirs, fullPath, managedAssemblyFolderPath, out text2, out text3, monoLinkerPath, platformProvider, enumerable))
 				{
-					goto Block_6;
+					goto Block_7;
 				}
-				string text4 = Path.Combine(managedAssemblyFolderPath, "ICallSummary.txt");
-				AssemblyStripper.GenerateInternalCallSummaryFile(text4, managedAssemblyFolderPath, fullPath);
-				if (flag)
+				if (platformProvider.supportsEngineStripping)
 				{
-					HashSet<UnityType> hashSet;
-					HashSet<string> nativeModules;
-					CodeStrippingUtils.GenerateDependencies(fullPath, text4, rcr, flag, out hashSet, out nativeModules, platformProvider);
-					flag2 = AssemblyStripper.AddWhiteListsForModules(nativeModules, ref enumerable, platformProvider.moduleStrippingInformationFolder);
+					string text4 = Path.Combine(managedAssemblyFolderPath, "ICallSummary.txt");
+					AssemblyStripper.GenerateInternalCallSummaryFile(text4, managedAssemblyFolderPath, fullPath);
+					if (flag)
+					{
+						HashSet<UnityType> hashSet;
+						HashSet<string> nativeModules;
+						CodeStrippingUtils.GenerateDependencies(fullPath, text4, rcr, flag, out hashSet, out nativeModules, platformProvider);
+						flag2 = AssemblyStripper.AddWhiteListsForModules(nativeModules, ref enumerable, platformProvider.moduleStrippingInformationFolder);
+					}
 				}
 				if (!flag2)
 				{
-					goto Block_8;
+					goto Block_10;
 				}
 			}
 			throw new OperationCanceledException();
-			Block_6:
+			Block_7:
 			throw new Exception(string.Concat(new object[]
 			{
 				"Error in stripping assemblies: ",
@@ -229,7 +238,7 @@ namespace UnityEditorInternal
 				", ",
 				text3
 			}));
-			Block_8:
+			Block_10:
 			string fullPath2 = Path.GetFullPath(Path.Combine(managedAssemblyFolderPath, "tempUnstripped"));
 			Directory.CreateDirectory(fullPath2);
 			string[] files2 = Directory.GetFiles(managedAssemblyFolderPath);
@@ -237,7 +246,7 @@ namespace UnityEditorInternal
 			{
 				string text5 = files2[j];
 				string extension = Path.GetExtension(text5);
-				if (string.Equals(extension, ".dll", StringComparison.InvariantCultureIgnoreCase) || string.Equals(extension, ".mdb", StringComparison.InvariantCultureIgnoreCase))
+				if (string.Equals(extension, ".dll", StringComparison.InvariantCultureIgnoreCase) || string.Equals(extension, ".winmd", StringComparison.InvariantCultureIgnoreCase) || string.Equals(extension, ".mdb", StringComparison.InvariantCultureIgnoreCase) || string.Equals(extension, ".pdb", StringComparison.InvariantCultureIgnoreCase))
 				{
 					File.Move(text5, Path.Combine(fullPath2, Path.GetFileName(text5)));
 				}

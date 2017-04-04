@@ -6,14 +6,21 @@ namespace UnityEditorInternal
 {
 	public static class Il2CppNativeCodeBuilderUtils
 	{
-		public static IEnumerable<string> AddBuilderArguments(Il2CppNativeCodeBuilder builder, string outputRelativePath, IEnumerable<string> includeRelativePaths)
+		public static IEnumerable<string> AddBuilderArguments(Il2CppNativeCodeBuilder builder, string outputRelativePath, IEnumerable<string> includeRelativePaths, bool debugBuild)
 		{
 			List<string> list = new List<string>();
 			list.Add("--compile-cpp");
 			list.Add("--libil2cpp-static");
 			list.Add(Il2CppNativeCodeBuilderUtils.FormatArgument("platform", builder.CompilerPlatform));
 			list.Add(Il2CppNativeCodeBuilderUtils.FormatArgument("architecture", builder.CompilerArchitecture));
-			list.Add(Il2CppNativeCodeBuilderUtils.FormatArgument("configuration", "Release"));
+			if (debugBuild)
+			{
+				list.Add(Il2CppNativeCodeBuilderUtils.FormatArgument("configuration", "Debug"));
+			}
+			else
+			{
+				list.Add(Il2CppNativeCodeBuilderUtils.FormatArgument("configuration", "Release"));
+			}
 			list.Add(Il2CppNativeCodeBuilderUtils.FormatArgument("outputpath", builder.ConvertOutputFileToFullPath(outputRelativePath)));
 			if (!string.IsNullOrEmpty(builder.CacheDirectory))
 			{
@@ -81,12 +88,17 @@ namespace UnityEditorInternal
 
 		private static string FormatArgument(string name, string value)
 		{
-			return string.Format("--{0}=\"{1}\"", name, value);
+			return string.Format("--{0}=\"{1}\"", name, Il2CppNativeCodeBuilderUtils.EscapeEmbeddedQuotes(value));
 		}
 
 		private static string EditorVersionFilenameFor(string editorVersion)
 		{
 			return string.Format("il2cpp_cache {0}", editorVersion);
+		}
+
+		private static string EscapeEmbeddedQuotes(string value)
+		{
+			return value.Replace("\"", "\\\"");
 		}
 	}
 }

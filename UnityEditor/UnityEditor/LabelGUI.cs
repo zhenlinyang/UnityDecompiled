@@ -26,17 +26,25 @@ namespace UnityEditor
 		public void OnEnable()
 		{
 			LabelGUI.s_AssetLabelsForObjectChangedDelegates = (Action<UnityEngine.Object>)Delegate.Combine(LabelGUI.s_AssetLabelsForObjectChangedDelegates, new Action<UnityEngine.Object>(this.AssetLabelsChangedForObject));
+			EditorApplication.projectWindowChanged = (EditorApplication.CallbackFunction)Delegate.Combine(EditorApplication.projectWindowChanged, new EditorApplication.CallbackFunction(this.InvalidateLabels));
 		}
 
 		public void OnDisable()
 		{
 			LabelGUI.s_AssetLabelsForObjectChangedDelegates = (Action<UnityEngine.Object>)Delegate.Remove(LabelGUI.s_AssetLabelsForObjectChangedDelegates, new Action<UnityEngine.Object>(this.AssetLabelsChangedForObject));
+			EditorApplication.projectWindowChanged = (EditorApplication.CallbackFunction)Delegate.Remove(EditorApplication.projectWindowChanged, new EditorApplication.CallbackFunction(this.InvalidateLabels));
 			this.SaveLabels();
 		}
 
 		public void OnLostFocus()
 		{
 			this.SaveLabels();
+		}
+
+		public void InvalidateLabels()
+		{
+			this.m_AssetLabels = null;
+			this.m_CurrentAssetsSet = null;
 		}
 
 		public void AssetLabelsChangedForObject(UnityEngine.Object asset)
@@ -156,7 +164,7 @@ namespace UnityEditor
 			GUILayout.FlexibleSpace();
 			Rect rect2 = GUILayoutUtility.GetRect(assetLabelIcon.fixedWidth, assetLabelIcon.fixedWidth, assetLabelIcon.fixedHeight + num3, assetLabelIcon.fixedHeight + num3);
 			rect2.x = rect.xMax + (float)assetLabelIcon.margin.left;
-			if (EditorGUI.ButtonMouseDown(rect2, GUIContent.none, FocusType.Passive, assetLabelIcon))
+			if (EditorGUI.DropdownButton(rect2, GUIContent.none, FocusType.Passive, assetLabelIcon))
 			{
 				PopupWindow.Show(rect2, new PopupList(this.m_AssetLabels), null, ShowMode.PopupMenuWithKeyboardFocus);
 			}
